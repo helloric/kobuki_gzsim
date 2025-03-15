@@ -23,7 +23,7 @@ from launch.substitutions import PathJoinSubstitution
 
 from launch_ros.actions import Node
 
-# TODO: namespace-kobuki
+import xacro
 
 
 def generate_launch_description():
@@ -82,7 +82,27 @@ def generate_launch_description():
         output='screen'
     )
 
+    # TODO: this shows the robot, but it does not work because:
+    #  libgazebo_ros_diff_drive.so could not be found.
+    robot_xacro_path = os.path.join(
+        pkg_kobuki_desc, 'urdf', 'kobuki_standalone.urdf.xacro')
+    assert os.path.isfile(robot_xacro_path)
+    robot_description = xacro.process_file(str(robot_xacro_path))
+    # Robot state description
+    state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        parameters=[
+            {'use_sim_time': True},
+            {'publish_frequency': 5.0},
+            {'robot_description': robot_description.toxml()}
+        ],
+        # remappings=[
+        #     ('/tf', ['/', robot_name, '/tf']),
+        #     ('/tf_static', ['/', robot_name, '/tf_static'])]
+    )
     return LaunchDescription([
+        state_publisher,
         gz_resource_path,
         gz_sim,
         bridge,
