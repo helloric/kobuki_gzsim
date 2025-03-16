@@ -82,11 +82,11 @@ def generate_launch_description():
         output='screen'
     )
 
-    # TODO: this shows the robot, but it does not work because:
-    #  libgazebo_ros_diff_drive.so could not be found.
     robot_xacro_path = os.path.join(
-        pkg_kobuki_desc, 'urdf', 'kobuki_standalone.urdf.xacro')
-    assert os.path.isfile(robot_xacro_path)
+        pkg_kobuki_gzsim, 'urdf', 'kobuki_standalone_gz_sim.urdf.xacro')
+    if not os.path.isfile(robot_xacro_path):
+        raise RuntimeError(
+            f'URDF description for kobuki base not found {pkg_kobuki_gzsim}')
     robot_description = xacro.process_file(str(robot_xacro_path))
     # Robot state description
     state_publisher = Node(
